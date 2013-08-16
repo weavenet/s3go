@@ -13,10 +13,6 @@ func main() {
     app.Name = "s3go"
     app.Usage = "CLI for S3"
 
-    app.Flags = []cli.Flag {
-      cli.StringFlag{"lang", "english", "language for the greeting"},
-    }
-
     app.Commands = []cli.Command{
       {
         Name:      "ls",
