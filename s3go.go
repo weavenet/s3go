@@ -13,6 +13,8 @@ func main() {
     app.Name = "s3go"
     app.Usage = "CLI for S3"
 
+    region := aws.USEast
+
     app.Commands = []cli.Command{
       {
         Name:        "ls",
@@ -28,7 +30,9 @@ func main() {
                   fmt.Printf("%v", r)
               }
           }()
-          ListBucketContents(c.Args()[0])
+          bucket := c.Args()[0]
+          fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
+          ListBucketContents(bucket, region)
         },
       },
     }
@@ -36,9 +40,9 @@ func main() {
     app.Run(os.Args)
 }
 
-func ListBucketContents(bucketName string) {
+func ListBucketContents(bucketName string, region aws.Region) {
     auth := ConnectS3()
-    s := s3.New(auth, aws.USEast)
+    s := s3.New(auth, region)
     bucket := s.Bucket(bucketName)
     data, err := bucket.List("", "", "", 0)
     if err != nil {
