@@ -15,9 +15,19 @@ func main() {
 
     app.Commands = []cli.Command{
       {
-        Name:      "ls",
-        Usage:     "List contents of bucket.",
+        Name:        "ls",
+        Usage:       "s3go ls BUCKET_NAME",
+        Description: "List contents of bucket.",
         Action: func(c *cli.Context) {
+          if len(c.Args()) == 0 {
+             fmt.Printf("Bucket required.")
+             os.Exit(1)
+          }
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
           ListBucketContents(c.Args()[0])
         },
       },
