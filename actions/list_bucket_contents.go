@@ -4,7 +4,6 @@ import (
     "fmt"
     "launchpad.net/goamz/s3"
     "launchpad.net/goamz/aws"
-    "os"
 )
 
 func ListBucketContents(bucketName string, region aws.Region) {
