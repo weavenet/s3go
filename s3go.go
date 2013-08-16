@@ -32,7 +32,7 @@ func main() {
           }()
           bucket := c.Args()[0]
           fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
-          ListBucketContents(bucket, region)
+          s3go.ListBucketContents(bucket, region)
         },
       },
     }
