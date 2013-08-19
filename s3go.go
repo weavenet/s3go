@@ -1,4 +1,4 @@
-package s3go
+package main
 
 import (
     "fmt"
