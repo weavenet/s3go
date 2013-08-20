@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/brettweavnet/s3go.png)](http://travis-ci.org/brettweavnet/s3go)
+
 # s3go
 
 CLI to interact with S3 written in Go.
