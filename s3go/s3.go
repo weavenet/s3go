@@ -3,14 +3,18 @@ package s3go
 import "strings"
 
 type S3Url struct {
-  url string
+    url string
 }
 
-func (r *S3Url) bucket() string {
+func (r *S3Url) SetUrl(url string) {
+    r.url = url
+}
+
+func (r *S3Url) Bucket() string {
     return r.keys()[0]
 }
 
-func (r *S3Url) key() string {
+func (r *S3Url) Key() string {
     return strings.Join(r.keys()[1: len(r.keys())], "/")
 }
 

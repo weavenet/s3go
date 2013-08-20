@@ -1,3 +1,1 @@
-package s3go
-
-import "testing"
+package main
