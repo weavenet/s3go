@@ -1,0 +1,6 @@
+deps:
+	@echo "Installing Deps"
+	go get -d -v ./...
+test: deps
+	@echo "Testing s3go"
+	go test ./...
