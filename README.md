@@ -15,4 +15,8 @@ Set environment variables:
 
 ## ls
 
-s3go ls bucket_name
+    s3go ls bucket_name
+
+## put
+
+    s3go put file target
