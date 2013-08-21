@@ -58,7 +58,27 @@ func main() {
           s3go.Put(bucket, key, local_file, region)
         },
       },
+      {
+        Name:        "rm",
+        Usage:       "s3go rm s3://BUCKET/KEY",
+        Description: "Remove key from s3.",
+        Action: func(c *cli.Context) {
+          if len(c.Args()) < 1 {
+             fmt.Printf("S3 location required.")
+             os.Exit(1)
+          }
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
+          s3url := s3go.S3Url{}
+          s3url.SetUrl(c.Args()[0])
+          bucket := s3url.Bucket()
+          key := s3url.Key()
+          s3go.Del(bucket, key, region)
+        },
+      },
     }
-
     app.Run(os.Args)
 }
