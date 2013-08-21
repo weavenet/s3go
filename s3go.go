@@ -18,7 +18,7 @@ func main() {
     app.Commands = []cli.Command{
       {
         Name:        "ls",
-        Usage:       "s3go ls BUCKET_NAME",
+        Usage:       "s3go ls s3:://BUCKET",
         Description: "List contents of bucket.",
         Action: func(c *cli.Context) {
           if len(c.Args()) == 0 {
@@ -58,6 +58,29 @@ func main() {
           key := s3url.Key()
           fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket, key)
           s3go.Put(bucket, key, local_file, region)
+        },
+      },
+      {
+        Name:        "get",
+        Usage:       "s3go get s3://BUCKET/KEY LOCAL_FILE",
+        Description: "Get file in s3.",
+        Action: func(c *cli.Context) {
+          if len(c.Args()) < 2 {
+             fmt.Printf("S3 location required and local file.")
+             os.Exit(1)
+          }
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
+          s3url := s3go.S3Url{}
+          s3url.SetUrl(c.Args()[0])
+          bucket := s3url.Bucket()
+          key := s3url.Key()
+          local_file := c.Args()[1]
+          fmt.Printf("Downloading file 's3://%s/%s' into '%s'.\n", bucket, key, local_file)
+          s3go.Get(local_file, bucket, key, region)
         },
       },
       {
