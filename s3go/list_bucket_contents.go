@@ -6,11 +6,11 @@ import (
     "launchpad.net/goamz/aws"
 )
 
-func ListBucketContents(bucketName string, region aws.Region) {
+func ListBucketContents(bucketName string, key string, region aws.Region) {
     auth := ConnectS3()
     s := s3.New(auth, region)
     bucket := s.Bucket(bucketName)
-    data, err := bucket.List("", "", "", 0)
+    data, err := bucket.List(key, "", "", 0)
     if err != nil {
         panic(err.Error())
     }

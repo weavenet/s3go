@@ -33,8 +33,9 @@ func main() {
           s3url := s3go.S3Url{}
           s3url.SetUrl(c.Args()[0])
           bucket := s3url.Bucket()
+          key := s3url.Key()
           fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
-          s3go.ListBucketContents(bucket, region)
+          s3go.ListBucketContents(bucket, key, region)
         },
       },
       {
