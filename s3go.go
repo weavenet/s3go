@@ -55,6 +55,7 @@ func main() {
           bucket := s3url.Bucket()
           key := s3url.Key()
           fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket, key)
+          s3go.Put(bucket, key, local_file, region)
         },
       },
     }
