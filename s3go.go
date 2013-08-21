@@ -76,6 +76,7 @@ func main() {
           s3url.SetUrl(c.Args()[0])
           bucket := s3url.Bucket()
           key := s3url.Key()
+          fmt.Printf("Removing file 's3://%s/%s'.\n", bucket, key)
           s3go.Del(bucket, key, region)
         },
       },
