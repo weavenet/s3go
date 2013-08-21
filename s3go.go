@@ -30,7 +30,9 @@ func main() {
                   fmt.Printf("%v", r)
               }
           }()
-          bucket := c.Args()[0]
+          s3url := s3go.S3Url{}
+          s3url.SetUrl(c.Args()[0])
+          bucket := s3url.Bucket()
           fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
           s3go.ListBucketContents(bucket, region)
         },
