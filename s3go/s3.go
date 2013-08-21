@@ -19,6 +19,6 @@ func (r *S3Url) Key() string {
 }
 
 func (r *S3Url) keys() []string {
-    trimmed_string := strings.Trim(r.url, "s3://")
+    trimmed_string := strings.TrimLeft(r.url, "s3://")
     return strings.Split(trimmed_string, "/")
 }
