@@ -30,14 +30,14 @@ func main() {
                   fmt.Printf("%v", r)
               }
           }()
-          s3url := s3go.S3Url{}
-          s3url.SetUrl(c.Args()[0])
+          s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s3url.Bucket()
           key := s3url.Key()
           fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
           s3go.ListBucketContents(bucket, key, region)
         },
       },
+
       {
         Name:        "put",
         Usage:       "s3go put LOCAL_FILE s3://BUCKET/KEY",
@@ -53,8 +53,7 @@ func main() {
               }
           }()
           local_file := c.Args()[0]
-          s3url := s3go.S3Url{}
-          s3url.SetUrl(c.Args()[1])
+          s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s3url.Bucket()
           key := s3url.Key()
           fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket, key)
@@ -75,8 +74,7 @@ func main() {
                   fmt.Printf("%v", r)
               }
           }()
-          s3url := s3go.S3Url{}
-          s3url.SetUrl(c.Args()[0])
+          s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s3url.Bucket()
           key := s3url.Key()
           local_file := c.Args()[1]
@@ -98,8 +96,7 @@ func main() {
                   fmt.Printf("%v", r)
               }
           }()
-          s3url := s3go.S3Url{}
-          s3url.SetUrl(c.Args()[0])
+          s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s3url.Bucket()
           key := s3url.Key()
           fmt.Printf("Removing file 's3://%s/%s'.\n", bucket, key)

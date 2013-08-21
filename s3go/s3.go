@@ -3,11 +3,7 @@ package s3go
 import "strings"
 
 type S3Url struct {
-    url string
-}
-
-func (r *S3Url) SetUrl(url string) {
-    r.url = url
+    Url string
 }
 
 func (r *S3Url) Bucket() string {
@@ -19,6 +15,6 @@ func (r *S3Url) Key() string {
 }
 
 func (r *S3Url) keys() []string {
-    trimmed_string := strings.TrimLeft(r.url, "s3://")
+    trimmed_string := strings.TrimLeft(r.Url, "s3://")
     return strings.Split(trimmed_string, "/")
 }
