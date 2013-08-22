@@ -1,12 +1,11 @@
 package s3go
 
 import (
-    "fmt"
     "launchpad.net/goamz/s3"
     "launchpad.net/goamz/aws"
 )
 
-func ListBucketContents(bucketName string, key string, region aws.Region) {
+func ListBucketContents(bucketName string, key string, region aws.Region) (contents []s3.Key) {
     auth := ConnectS3()
     s := s3.New(auth, region)
     bucket := s.Bucket(bucketName)
@@ -15,7 +14,5 @@ func ListBucketContents(bucketName string, key string, region aws.Region) {
         panic(err.Error())
     }
 
-    for key := range data.Contents {
-        fmt.Printf("s3://%s/%s\n", bucketName, data.Contents[key].Key)
-    }
+    return data.Contents
 }

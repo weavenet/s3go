@@ -34,7 +34,10 @@ func main() {
           bucket := s3url.Bucket()
           key := s3url.Key()
           fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
-          s3go.ListBucketContents(bucket, key, region)
+          contents := s3go.ListBucketContents(bucket, key, region)
+          for key := range contents {
+              fmt.Printf("s3://%s/%s\n", bucket, contents[key].Key)
+          }
         },
       },
 
