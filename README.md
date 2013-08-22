@@ -20,3 +20,11 @@ Set environment variables:
 ## put
 
     s3go put file target
+
+## get
+
+    s3go put target file
+
+## rm
+
+    s3go rm target
