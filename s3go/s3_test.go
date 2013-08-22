@@ -11,7 +11,9 @@ type testpair struct {
 var tests = []testpair {
     { "s3://bucket/test.tar.gz", "bucket", "test.tar.gz" },
     { "s3://bucket-123/dir/folder/key", "bucket-123", "dir/folder/key" },
+    { "s3://bucket-123/files*", "bucket-123", "files*" },
     { "bucket-123/dir/folder/key", "bucket-123", "dir/folder/key" },
+    { "bucket-123", "bucket-123", "" },
 }
 
 func TestS3Url(t *testing.T) {
