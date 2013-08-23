@@ -2,16 +2,11 @@ package s3go
 
 import (
     "launchpad.net/goamz/s3"
-    "launchpad.net/goamz/aws"
     "io/ioutil"
     "os"
 )
 
-func Get(file string, bucketName string, path string, region aws.Region) {
-    auth := ConnectS3()
-    s := s3.New(auth, region)
-    bucket := s.Bucket(bucketName)
-
+func Get(file string, bucket *s3.Bucket, path string) {
     data, err := bucket.Get(path)
     if err != nil {
         panic(err.Error())

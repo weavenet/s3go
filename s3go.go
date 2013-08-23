@@ -5,6 +5,7 @@ import (
     "github.com/codegangsta/cli"
     "github.com/brettweavnet/s3go/s3go"
     "launchpad.net/goamz/aws"
+    "launchpad.net/goamz/s3"
     "os"
 )
 
@@ -14,6 +15,8 @@ func main() {
     app.Usage = "CLI for S3"
 
     region := aws.USEast
+    auth := s3go.ConnectS3()
+    s := s3.New(auth, region)
 
     app.Commands = []cli.Command{
       {
@@ -31,12 +34,16 @@ func main() {
               }
           }()
           s3url := s3go.S3Url{Url: c.Args()[0]}
-          bucket := s3url.Bucket()
           key := s3url.Key()
-          fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket, region.Name)
-          contents := s3go.ListBucketContents(bucket, key, region)
-          for key := range contents {
-              fmt.Printf("s3://%s/%s\n", bucket, contents[key].Key)
+          bucket := s.Bucket(s3url.Bucket())
+          fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket.Name, region.Name)
+          data, err := bucket.List(key, "", "", 0)
+          if err != nil {
+              panic(err.Error())
+          }
+
+          for key := range data.Contents {
+              fmt.Printf("s3://%s/%s\n", bucket.Name, data.Contents[key].Key)
           }
         },
       },
@@ -57,10 +64,10 @@ func main() {
           }()
           local_file := c.Args()[0]
           s3url := s3go.S3Url{Url: c.Args()[0]}
-          bucket := s3url.Bucket()
+          bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
-          fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket, key)
-          s3go.Put(bucket, key, local_file, region)
+          fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket.Name, key)
+          s3go.Put(bucket, key, local_file)
         },
       },
       {
@@ -78,11 +85,11 @@ func main() {
               }
           }()
           s3url := s3go.S3Url{Url: c.Args()[0]}
-          bucket := s3url.Bucket()
+          bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
           local_file := c.Args()[1]
           fmt.Printf("Downloading file 's3://%s/%s' into '%s'.\n", bucket, key, local_file)
-          s3go.Get(local_file, bucket, key, region)
+          s3go.Get(local_file, bucket, key)
         },
       },
       {
@@ -100,10 +107,10 @@ func main() {
               }
           }()
           s3url := s3go.S3Url{Url: c.Args()[0]}
-          bucket := s3url.Bucket()
+          bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
           fmt.Printf("Removing file 's3://%s/%s'.\n", bucket, key)
-          s3go.Del(bucket, key, region)
+          bucket.Del(key)
         },
       },
     }
