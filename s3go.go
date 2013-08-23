@@ -7,6 +7,7 @@ import (
     "launchpad.net/goamz/aws"
     "launchpad.net/goamz/s3"
     "os"
+    "strings"
 )
 
 func main() {
@@ -63,9 +64,12 @@ func main() {
               }
           }()
           local_file := c.Args()[0]
-          s3url := s3go.S3Url{Url: c.Args()[0]}
+          s3url := s3go.S3Url{Url: c.Args()[1]}
           bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
+          if key == "" {
+              key = strings.Split(local_file, "/")[len(strings.Split(local_file, "/"))-1]
+          }
           fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket.Name, key)
           s3go.Put(bucket, key, local_file)
         },
@@ -88,7 +92,7 @@ func main() {
           bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
           local_file := c.Args()[1]
-          fmt.Printf("Downloading file 's3://%s/%s' into '%s'.\n", bucket, key, local_file)
+          fmt.Printf("Downloading file 's3://%s/%s' into '%s'.\n", bucket.Name, key, local_file)
           s3go.Get(local_file, bucket, key)
         },
       },
@@ -109,7 +113,7 @@ func main() {
           s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
-          fmt.Printf("Removing file 's3://%s/%s'.\n", bucket, key)
+          fmt.Printf("Removing file 's3://%s/%s'.\n", bucket.Name, key)
           bucket.Del(key)
         },
       },
