@@ -29,18 +29,18 @@ func main() {
              fmt.Printf("Bucket required.")
              os.Exit(1)
           }
+          s3url := s3go.S3Url{Url: c.Args()[0]}
+          key := s3url.Key()
+          bucket := s.Bucket(s3url.Bucket())
+          fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket.Name, region.Name)
           defer func() {
               if r := recover(); r != nil {
                   fmt.Printf("%v", r)
               }
           }()
-          s3url := s3go.S3Url{Url: c.Args()[0]}
-          key := s3url.Key()
-          bucket := s.Bucket(s3url.Bucket())
-          fmt.Printf("Listing contents of bucket '%s' in region '%s'.\n", bucket.Name, region.Name)
           data, err := bucket.List(key, "", "", 0)
           if err != nil {
-              panic(err.Error())
+             panic(err.Error())
           }
 
           for key := range data.Contents {
@@ -58,11 +58,6 @@ func main() {
              fmt.Printf("Local file and S3 location required.")
              os.Exit(1)
           }
-          defer func() {
-              if r := recover(); r != nil {
-                  fmt.Printf("%v", r)
-              }
-          }()
           local_file := c.Args()[0]
           s3url := s3go.S3Url{Url: c.Args()[1]}
           bucket := s.Bucket(s3url.Bucket())
@@ -71,6 +66,11 @@ func main() {
               key = strings.Split(local_file, "/")[len(strings.Split(local_file, "/"))-1]
           }
           fmt.Printf("Putting file '%s' in 's3://%s/%s'.\n", local_file, bucket.Name, key)
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
           s3go.Put(bucket, key, local_file)
         },
       },
@@ -83,16 +83,16 @@ func main() {
              fmt.Printf("S3 location required and local file.")
              os.Exit(1)
           }
-          defer func() {
-              if r := recover(); r != nil {
-                  fmt.Printf("%v", r)
-              }
-          }()
           s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
           local_file := c.Args()[1]
           fmt.Printf("Downloading file 's3://%s/%s' into '%s'.\n", bucket.Name, key, local_file)
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
           s3go.Get(local_file, bucket, key)
         },
       },
@@ -105,32 +105,16 @@ func main() {
              fmt.Printf("S3 location required.")
              os.Exit(1)
           }
-          defer func() {
-              if r := recover(); r != nil {
-                  fmt.Printf("%v", r)
-              }
-          }()
           s3url := s3go.S3Url{Url: c.Args()[0]}
           bucket := s.Bucket(s3url.Bucket())
           key := s3url.Key()
           fmt.Printf("Removing file 's3://%s/%s'.\n", bucket.Name, key)
-          bucket.Del(key)
-        },
-      },
-      {
-        Name:        "sync",
-        Usage:       "s3go sync DIR s3://BUCKET/KEY",
-        Description: "Sync directory to BUCKET",
-        Action: func(c *cli.Context) {
-          if len(c.Args()) < 2 {
-             fmt.Printf("Local directory and S3 location required.")
-             os.Exit(1)
-          }
           defer func() {
               if r := recover(); r != nil {
                   fmt.Printf("%v", r)
               }
           }()
+          bucket.Del(key)
         },
       },
     }
