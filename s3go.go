@@ -117,6 +117,22 @@ func main() {
           bucket.Del(key)
         },
       },
+      {
+        Name:        "sync",
+        Usage:       "s3go sync DIR s3://BUCKET/KEY",
+        Description: "Sync directory to BUCKET",
+        Action: func(c *cli.Context) {
+          if len(c.Args()) < 2 {
+             fmt.Printf("Local directory and S3 location required.")
+             os.Exit(1)
+          }
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
+        },
+      },
     }
     app.Run(os.Args)
 }
