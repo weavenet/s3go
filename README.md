@@ -4,6 +4,17 @@
 
 CLI to interact with S3 written in Go.
 
+# Installation
+
+Clone the repo:
+
+    get clone https://github.com/brettweavnet/s3go
+
+Chagne in the s3go directory and run make:
+
+    cd s3go
+    make
+
 # Setup
 
 Set environment variables:
@@ -15,16 +26,16 @@ Set environment variables:
 
 ## ls
 
-    s3go ls bucket_name
+    s3go ls s3_url
 
 ## put
 
-    s3go put file target
+    s3go put file s3_url
 
 ## get
 
-    s3go put target file
+    s3go put s3_url file
 
 ## rm
 
-    s3go rm target
+    s3go rm s3_url

@@ -1,4 +1,4 @@
-all: deps
+all: deps test
 	@mkdir -p bin/
 	go build -v -o bin/s3go .
 deps:
