@@ -2,6 +2,7 @@ package s3go
 
 import (
     "os"
+    "path/filepath"
     "strings"
     "launchpad.net/goamz/aws"
 )
@@ -14,14 +15,23 @@ type SyncPair struct {
 
 func (s *SyncPair) Sync() bool {
     if s.validPair() {
-        return true
-    }
-    if validS3Url(s.Source) {
-       s.syncS3ToDir()
-    } else {
-       s.syncDirToS3()
+        if validS3Url(s.Source) {
+           loadFiles("/etc/")
+           s.syncS3ToDir()
+        } else {
+           s.syncDirToS3()
+        }
     }
     return false
+}
+
+func loadFile(path string, f os.FileInfo, err error) error {
+  println("%s", path)
+  return nil
+} 
+
+func loadFiles(path string) {
+  filepath.Walk(path, loadFile)
 }
 
 func (s *SyncPair) syncDirToS3() bool {
