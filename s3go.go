@@ -129,7 +129,7 @@ func main() {
           arg0 := c.Args()[0]
           arg1 := c.Args()[1]
           fmt.Printf("Syncing %s with %s\n", arg0, arg1)
-          sync := s3go.SyncPair{arg0, arg1}
+          sync := s3go.SyncPair{arg0, arg1, auth}
           result := sync.Sync()
           fmt.Printf("Result: %s\n", result)
         },

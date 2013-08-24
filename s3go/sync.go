@@ -3,11 +3,13 @@ package s3go
 import (
     "os"
     "strings"
+    "launchpad.net/goamz/aws"
 )
 
 type SyncPair struct {
     Source string
     Target string
+    Auth aws.Auth
 }
 
 func (s *SyncPair) Sync() bool {
