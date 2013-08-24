@@ -1,12 +1,12 @@
 package main
 
 import (
+    "os"
     "fmt"
     "github.com/codegangsta/cli"
     "github.com/brettweavnet/s3go/s3go"
     "launchpad.net/goamz/aws"
     "launchpad.net/goamz/s3"
-    "os"
     "strings"
 )
 
@@ -117,6 +117,28 @@ func main() {
           bucket.Del(key)
         },
       },
+      {
+        Name:        "sync",
+        Usage:       "s3go sync LOCAL_DIR s3://BUCKET/KEY",
+        Description: "Sync local dir with S3 URL.",
+        Action: func(c *cli.Context) {
+          if len(c.Args()) < 2 {
+             fmt.Printf("S3 URL and local directory required.")
+             os.Exit(1)
+          }
+          arg0 := c.Args()[0]
+          arg1 := c.Args()[1]
+          fmt.Printf("Syncing %s with %s\n", arg0, arg1)
+          sync := s3go.SyncPair{arg0, arg1}
+          result := sync.Sync()
+          fmt.Printf("Result: %s\n", result)
+        },
+      },
     }
     app.Run(os.Args)
+}
+
+func visit(path string, f os.FileInfo, err error) error {
+  fmt.Printf("Visited: %s\n", path)
+  return nil
 }
