@@ -2,7 +2,7 @@ package s3go
 
 import (
     "encoding/base64"
-    "crypto/sha1"
+    "crypto/md5"
     "fmt"
     "io"
     "os"
@@ -35,16 +35,16 @@ func (s *SyncPair) Sync() bool {
 func (s *SyncPair) syncDirToS3() bool {
     sourceFiles := loadLocalFiles(s.Source)
     targetFiles := loadS3Files(s.Target, s.Auth)
-    for k, _ := range targetFiles { println(targetFiles[k]) }
-    for k, _ := range sourceFiles { println(sourceFiles[k]) }
+    for k, _ := range targetFiles { println(k) }
+    for k, _ := range sourceFiles { println(k) }
     return true
 }
 
 func (s *SyncPair) syncS3ToDir() bool {
     sourceFiles := loadS3Files(s.Source, s.Auth)
     targetFiles := loadLocalFiles(s.Target)
-    for k, _ := range targetFiles { println(targetFiles[k]) }
-    for k, _ := range sourceFiles { println(sourceFiles[k]) }
+    for k, _ := range targetFiles { println(k) }
+    for k, _ := range sourceFiles { println(k) }
     return true
 }
 
@@ -65,15 +65,8 @@ func loadS3Files(url string, auth aws.Auth) map[string]string {
              panic(err.Error())
           }
           for key := range data.Contents {
-              fmt.Printf("s3://%s/%s\n", bucket.Name, data.Contents[key].Key)
-            k, err := bucket.Get(data.Contents[key].Key)
-            if err != nil {
-               panic(err.Error())
-            }
-            hasher := sha1.New()
-            hasher.Write(k)
-            sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-            files[data.Contents[key].Key] = sha
+            md5sum := data.Contents[key].Key
+            files[data.Contents[key].Key] = md5sum
           }
           return files
 }
@@ -82,6 +75,7 @@ func loadLocalFiles(path string) map[string]string {
     files := map[string]string{}
     filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
         if !info.IsDir() {
+            relativePath := strings.TrimLeft(filePath, path)
             fi, err := os.Open(filePath)
             if err != nil {
                 panic(err)
@@ -93,10 +87,10 @@ func loadLocalFiles(path string) map[string]string {
                 if err != nil && err != io.EOF { panic(err) }
                 if n == 0 { break }
             }
-            hasher := sha1.New()
+            hasher := md5.New()
             hasher.Write(buf)
-            sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-            files[filePath] = sha
+            md5sum := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+            files[relativePath] = md5sum
             fi.Close()
         }
         return nil
