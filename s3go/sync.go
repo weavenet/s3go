@@ -1,12 +1,15 @@
 package s3go
 
 import (
-    //"crypto/sha1"
+    "encoding/base64"
+    "crypto/sha1"
+    "fmt"
     "io"
     "os"
     "path/filepath"
     "strings"
     "launchpad.net/goamz/aws"
+    "launchpad.net/goamz/s3"
 )
 
 type SyncPair struct {
@@ -30,25 +33,56 @@ func (s *SyncPair) Sync() bool {
 }
 
 func (s *SyncPair) syncDirToS3() bool {
-    loadFiles(s.Source)
+    sourceFiles := loadLocalFiles(s.Source)
+    targetFiles := loadS3Files(s.Target, s.Auth)
+    for k, _ := range targetFiles { println(targetFiles[k]) }
+    for k, _ := range sourceFiles { println(sourceFiles[k]) }
     return true
 }
 
 func (s *SyncPair) syncS3ToDir() bool {
-    loadFiles(s.Target)
+    sourceFiles := loadS3Files(s.Source, s.Auth)
+    targetFiles := loadLocalFiles(s.Target)
+    for k, _ := range targetFiles { println(targetFiles[k]) }
+    for k, _ := range sourceFiles { println(sourceFiles[k]) }
     return true
 }
 
-func loadFile(path string, f os.FileInfo, e error) error {
-  return nil
+func loadS3Files(url string, auth aws.Auth) map[string]string {
+    files := map[string]string{}
+          s3url := S3Url{Url: url}
+          key := s3url.Key()
+          region := aws.USEast
+          s := s3.New(auth, region)
+          bucket := s.Bucket(s3url.Bucket())
+          defer func() {
+              if r := recover(); r != nil {
+                  fmt.Printf("%v", r)
+              }
+          }()
+          data, err := bucket.List(key, "", "", 0)
+          if err != nil {
+             panic(err.Error())
+          }
+          for key := range data.Contents {
+              fmt.Printf("s3://%s/%s\n", bucket.Name, data.Contents[key].Key)
+            k, err := bucket.Get(data.Contents[key].Key)
+            if err != nil {
+               panic(err.Error())
+            }
+            hasher := sha1.New()
+            hasher.Write(k)
+            sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+            files[data.Contents[key].Key] = sha
+          }
+          return files
 }
 
-func loadFiles(path string) map[string]string {
+func loadLocalFiles(path string) map[string]string {
     files := map[string]string{}
-    filepath.Walk(path, func(file_path string, info os.FileInfo, err error) error {
+    filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
         if !info.IsDir() {
-            // Add path to files
-            fi, err := os.Open(path)
+            fi, err := os.Open(filePath)
             if err != nil {
                 panic(err)
             }
@@ -59,12 +93,11 @@ func loadFiles(path string) map[string]string {
                 if err != nil && err != io.EOF { panic(err) }
                 if n == 0 { break }
             }
-
-            //files[file_path]
-            // read the file into content here
-            println(file_path)
-            println(buf)
-            println(fi)
+            hasher := sha1.New()
+            hasher.Write(buf)
+            sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+            files[filePath] = sha
+            fi.Close()
         }
         return nil
     })
