@@ -1,10 +1,9 @@
 package s3go
 
 import (
-    "encoding/base64"
     "crypto/md5"
     "fmt"
-    "io"
+    "io/ioutil"
     "os"
     "path/filepath"
     "strings"
@@ -28,23 +27,27 @@ func (s *SyncPair) Sync() bool {
            return true
         }
     }
-    println("Path not valid.")
+    fmt.Printf("Path not valid.")
     return false
 }
 
 func (s *SyncPair) syncDirToS3() bool {
     sourceFiles := loadLocalFiles(s.Source)
     targetFiles := loadS3Files(s.Target, s.Auth)
-    for k, _ := range targetFiles { println(k) }
-    for k, _ := range sourceFiles { println(k) }
+    fmt.Printf("Sources:\n")
+    for k, _ := range sourceFiles { fmt.Printf("Key %s Value %s\n", k, sourceFiles[k]) }
+    fmt.Printf("Targets:\n")
+    for k, _ := range targetFiles { fmt.Printf("Key %s Value %s\n", k, targetFiles[k]) }
     return true
 }
 
 func (s *SyncPair) syncS3ToDir() bool {
     sourceFiles := loadS3Files(s.Source, s.Auth)
     targetFiles := loadLocalFiles(s.Target)
-    for k, _ := range targetFiles { println(k) }
-    for k, _ := range sourceFiles { println(k) }
+    fmt.Printf("Sources:\n")
+    for k, _ := range sourceFiles { fmt.Printf("Key %s Value %s\n", k, sourceFiles[k]) }
+    fmt.Printf("Targets:\n")
+    for k, _ := range targetFiles { fmt.Printf("Key %s Value %s\n", k, targetFiles[k]) }
     return true
 }
 
@@ -65,8 +68,8 @@ func loadS3Files(url string, auth aws.Auth) map[string]string {
              panic(err.Error())
           }
           for key := range data.Contents {
-            md5sum := data.Contents[key].Key
-            files[data.Contents[key].Key] = md5sum
+            md5sum := data.Contents[key].ETag
+            files[data.Contents[key].Key] = strings.Trim(md5sum, "\"")
           }
           return files
 }
@@ -76,22 +79,16 @@ func loadLocalFiles(path string) map[string]string {
     filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
         if !info.IsDir() {
             relativePath := strings.TrimLeft(filePath, path)
-            fi, err := os.Open(filePath)
+
+            buf, err := ioutil.ReadFile(filePath)
             if err != nil {
                 panic(err)
             }
-            buf := make([]byte, 1024)
-            for {
-                // read a chunk
-                n, err := fi.Read(buf)
-                if err != nil && err != io.EOF { panic(err) }
-                if n == 0 { break }
-            }
+
             hasher := md5.New()
             hasher.Write(buf)
-            md5sum := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+            md5sum := fmt.Sprintf("%x", hasher.Sum(nil))
             files[relativePath] = md5sum
-            fi.Close()
         }
         return nil
     })
