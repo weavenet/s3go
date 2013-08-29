@@ -34,10 +34,22 @@ func (s *SyncPair) Sync() bool {
 func (s *SyncPair) syncDirToS3() bool {
     sourceFiles := loadLocalFiles(s.Source)
     targetFiles := loadS3Files(s.Target, s.Auth)
-    fmt.Printf("Sources:\n")
-    for k, _ := range sourceFiles { fmt.Printf("Key %s Value %s\n", k, sourceFiles[k]) }
-    fmt.Printf("Targets:\n")
-    for k, _ := range targetFiles { fmt.Printf("Key %s Value %s\n", k, targetFiles[k]) }
+    for k, _ := range sourceFiles {
+fmt.Printf("%s: %s == %s: %s", k, targetFiles[k], k, sourceFiles[k])
+        if targetFiles[k] != sourceFiles[k] {
+            fmt.Printf("Syncing %s\n", k)
+            s3url := S3Url{Url: s.Target}
+            st := []string{s.Source, k}
+            key := strings.Join(st, "/")
+            region := aws.USEast
+            s3 := s3.New(s.Auth, region)
+            bucket := s3.Bucket(s3url.Bucket())
+            pt := strings.Join([]string{s.Target, k}, "/")
+            Put(bucket, pt, key)
+        } else {
+            fmt.Printf("Not Syncing %s\n", k)
+        }
+    }
     return true
 }
 
@@ -67,9 +79,10 @@ func loadS3Files(url string, auth aws.Auth) map[string]string {
           if err != nil {
              panic(err.Error())
           }
-          for key := range data.Contents {
-            md5sum := data.Contents[key].ETag
-            files[data.Contents[key].Key] = strings.Trim(md5sum, "\"")
+          for i := range data.Contents {
+            md5sum := data.Contents[i].ETag
+            k := strings.TrimLeft(data.Contents[i].Key, url)
+            files[k] = strings.Trim(md5sum, "\"")
           }
           return files
 }
